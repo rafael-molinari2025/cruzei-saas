@@ -71,9 +71,11 @@ ALTER TABLE reconciliations      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reconciliation_items ENABLE ROW LEVEL SECURITY;
 
 -- Políticas: usuário acessa apenas seus próprios dados
+DROP POLICY IF EXISTS "own_reconciliations" ON reconciliations;
 CREATE POLICY "own_reconciliations" ON reconciliations
   FOR ALL USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "own_items" ON reconciliation_items;
 CREATE POLICY "own_items" ON reconciliation_items
   FOR ALL USING (
     reconciliation_id IN (
