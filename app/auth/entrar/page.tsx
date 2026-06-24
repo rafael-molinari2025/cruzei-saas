@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import AuthForm from '@/components/auth/auth-form'
 import type { Metadata } from 'next'
 
