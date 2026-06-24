@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { fmtBRL, fmtPct } from '@/lib/utils'
 import type { DBReconciliation } from '@/lib/engine/types'
+import MonthlyChart from '@/components/dashboard/monthly-chart'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Visão geral' }
@@ -10,20 +11,36 @@ export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: recs } = await supabase
+  const { data: allRecs } = await supabase
     .from('reconciliations')
     .select('*')
     .eq('user_id', user!.id)
-    .order('created_at', { ascending: false })
-    .limit(10)
+    .order('created_at', { ascending: true })
 
-  const all = (recs ?? []) as DBReconciliation[]
+  const all = (allRecs ?? []) as DBReconciliation[]
+  const recent = [...all].reverse().slice(0, 10)
+
+  // Agrega por mês para o gráfico
+  const byMonth: Record<string, { gross: number; fees: number; net: number; count: number }> = {}
+  for (const r of all) {
+    const m = r.created_at.slice(0, 7)
+    if (!byMonth[m]) byMonth[m] = { gross: 0, fees: 0, net: 0, count: 0 }
+    byMonth[m].gross += r.total_gross
+    byMonth[m].fees  += r.total_fees
+    byMonth[m].net   += r.total_actual_net
+    byMonth[m].count += 1
+  }
+  const monthlyData = Object.entries(byMonth)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-12)
+    .map(([month, v]) => ({ month: month.slice(5) + '/' + month.slice(2, 4), ...v }))
 
   // Aggregate stats from all reconciliations
   const totalGross   = all.reduce((a, r) => a + r.total_gross, 0)
   const totalFees    = all.reduce((a, r) => a + r.total_fees, 0)
   const totalNet     = all.reduce((a, r) => a + r.total_actual_net, 0)
   const avgMatch     = all.length ? all.reduce((a, r) => a + r.match_rate, 0) / all.length : 0
+  void totalNet
 
   const mpLabel: Record<string, string> = {
     shopee: '🛍 Shopee', etsy: '🎨 Etsy', ml: '🛒 Mercado Livre', amazon: '📦 Amazon', custom: '⚙️ Personalizado',
@@ -60,6 +77,9 @@ export default async function DashboardPage() {
         ))}
       </div>
 
+      {/* Monthly chart */}
+      {monthlyData.length > 1 && <MonthlyChart data={monthlyData} />}
+
       {/* Recent reconciliations */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -67,7 +87,7 @@ export default async function DashboardPage() {
           <Link href="/dashboard/historico" className="text-xs text-primary-600 font-semibold hover:underline">Ver todas →</Link>
         </div>
 
-        {all.length === 0 ? (
+        {recent.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <p className="text-4xl mb-3">📭</p>
             <p className="font-medium">Nenhuma conciliação ainda</p>
@@ -90,7 +110,7 @@ export default async function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {all.map(r => (
+                {recent.map(r => (
                   <tr key={r.id} className="hover:bg-gray-50">
                     <td className="px-6 py-3.5 font-medium text-gray-900">{r.name}</td>
                     <td className="px-6 py-3.5 text-gray-600">{mpLabel[r.marketplace] ?? r.marketplace}</td>
