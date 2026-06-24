@@ -24,8 +24,13 @@ export async function POST(req: Request) {
     const userId     = customer.metadata?.supabase_id
     if (!userId) return
 
-    const item     = sub.items.data[0]
-    const plan     = item?.price?.lookup_key ?? item?.price?.metadata?.plan ?? 'starter'
+    const item      = sub.items.data[0]
+    const priceId   = item?.price?.id ?? ''
+    const starterPriceId = process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID ?? ''
+    const proPriceId     = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID ?? ''
+    const plan = priceId === proPriceId ? 'pro'
+               : priceId === starterPriceId ? 'starter'
+               : item?.price?.lookup_key ?? 'starter'
     const isActive = sub.status === 'active' || sub.status === 'trialing'
 
     await admin.from('profiles').update({
