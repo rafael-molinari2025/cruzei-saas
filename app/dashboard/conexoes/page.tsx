@@ -31,10 +31,11 @@ const MARKETPLACES = [
 ]
 
 const MESSAGES: Record<string, { type: 'ok' | 'err'; text: string }> = {
-  ml:               { type: 'ok',  text: 'Mercado Livre conectado com sucesso!' },
-  ml_disconnected:  { type: 'ok',  text: 'Mercado Livre desconectado.' },
-  ml_auth:          { type: 'err', text: 'Erro ao autorizar o Mercado Livre. Tente novamente.' },
-  ml_token:         { type: 'err', text: 'Não foi possível obter o token do Mercado Livre. Verifique as credenciais do app.' },
+  ml:                   { type: 'ok',  text: 'Mercado Livre conectado com sucesso!' },
+  ml_disconnected:      { type: 'ok',  text: 'Mercado Livre desconectado.' },
+  ml_auth:              { type: 'err', text: 'Erro ao autorizar o Mercado Livre. Tente novamente.' },
+  ml_token:             { type: 'err', text: 'Não foi possível obter o token do Mercado Livre. Verifique as credenciais do app.' },
+  ml_not_configured:    { type: 'err', text: 'A integração com Mercado Livre ainda não foi ativada. Configure ML_APP_ID e ML_CLIENT_SECRET no painel de administração.' },
 }
 
 export default async function ConexoesPage({

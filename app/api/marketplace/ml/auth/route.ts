@@ -2,15 +2,13 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 
-export async function GET() {
-  const appId      = process.env.ML_APP_ID
+export async function GET(request: Request) {
+  const { origin } = new URL(request.url)
+  const appId       = process.env.ML_APP_ID
   const redirectUri = process.env.ML_REDIRECT_URI
 
   if (!appId || !redirectUri) {
-    return NextResponse.json(
-      { error: 'Integração com Mercado Livre não configurada. Adicione ML_APP_ID e ML_REDIRECT_URI nas variáveis de ambiente.' },
-      { status: 503 }
-    )
+    return NextResponse.redirect(`${origin}/dashboard/conexoes?error=ml_not_configured`)
   }
 
   const mlAuthUrl = new URL('https://auth.mercadolivre.com.br/authorization')
