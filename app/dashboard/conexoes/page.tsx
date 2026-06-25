@@ -20,8 +20,8 @@ const MARKETPLACES = [
   },
   {
     id: 'etsy', name: 'Etsy', icon: '🎨', color: 'border-amber-400',
-    authUrl: null,
-    note: 'Em breve — conexão via OAuth Etsy.',
+    authUrl: '/api/marketplace/etsy/auth',
+    note: 'Conecte sua loja Etsy para importar pedidos automaticamente.',
   },
   {
     id: 'amazon', name: 'Amazon', icon: '📦', color: 'border-blue-400',
@@ -31,11 +31,16 @@ const MARKETPLACES = [
 ]
 
 const MESSAGES: Record<string, { type: 'ok' | 'err'; text: string }> = {
-  ml:                   { type: 'ok',  text: 'Mercado Livre conectado com sucesso!' },
-  ml_disconnected:      { type: 'ok',  text: 'Mercado Livre desconectado.' },
-  ml_auth:              { type: 'err', text: 'Erro ao autorizar o Mercado Livre. Tente novamente.' },
-  ml_token:             { type: 'err', text: 'Não foi possível obter o token do Mercado Livre. Verifique as credenciais do app.' },
-  ml_not_configured:    { type: 'err', text: 'A integração com Mercado Livre ainda não foi ativada. Configure ML_APP_ID e ML_CLIENT_SECRET no painel de administração.' },
+  ml:                    { type: 'ok',  text: 'Mercado Livre conectado com sucesso!' },
+  ml_disconnected:       { type: 'ok',  text: 'Mercado Livre desconectado.' },
+  ml_auth:               { type: 'err', text: 'Erro ao autorizar o Mercado Livre. Tente novamente.' },
+  ml_token:              { type: 'err', text: 'Não foi possível obter o token do Mercado Livre. Verifique as credenciais do app.' },
+  ml_not_configured:     { type: 'err', text: 'A integração com Mercado Livre ainda não foi ativada. Configure ML_APP_ID e ML_CLIENT_SECRET no painel de administração.' },
+  etsy:                  { type: 'ok',  text: 'Etsy conectado com sucesso!' },
+  etsy_disconnected:     { type: 'ok',  text: 'Etsy desconectado.' },
+  etsy_auth:             { type: 'err', text: 'Erro ao autorizar o Etsy. Tente novamente.' },
+  etsy_token:            { type: 'err', text: 'Não foi possível obter o token do Etsy. Verifique as credenciais do app.' },
+  etsy_not_configured:   { type: 'err', text: 'A integração com Etsy ainda não foi ativada. Configure ETSY_CLIENT_ID e ETSY_REDIRECT_URI no painel de administração.' },
 }
 
 export default async function ConexoesPage({
