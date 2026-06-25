@@ -46,6 +46,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <span className="font-bold text-lg text-primary-600 tracking-tight">✕ Cruzei</span>
           <div className="flex items-center gap-4">
+            <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900 font-medium hidden sm:block">Demo</Link>
             <Link href="#precos" className="text-sm text-gray-600 hover:text-gray-900 font-medium hidden sm:block">Preços</Link>
             <Link href="#faq" className="text-sm text-gray-600 hover:text-gray-900 font-medium hidden sm:block">FAQ</Link>
             <Link href="/auth/entrar" className="text-sm text-gray-600 hover:text-gray-900 font-medium">Entrar</Link>
@@ -196,10 +197,13 @@ export default function LandingPage() {
       <footer className="bg-gray-900 text-gray-400 py-8 px-6 text-sm mt-auto">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© 2026 Cruzei · Conciliação Financeira para Marketplace</p>
-          <div className="flex gap-6">
+          <div className="flex gap-6 flex-wrap justify-center">
             <Link href="/planos" className="hover:text-white transition-colors">Planos</Link>
+            <Link href="/demo" className="hover:text-white transition-colors">Demo</Link>
             <Link href="/auth/entrar" className="hover:text-white transition-colors">Entrar</Link>
             <Link href="/auth/cadastro" className="hover:text-white transition-colors">Criar conta</Link>
+            <Link href="/termos" className="hover:text-white transition-colors">Termos de Uso</Link>
+            <Link href="/privacidade" className="hover:text-white transition-colors">Privacidade</Link>
           </div>
         </div>
       </footer>
