@@ -41,6 +41,7 @@ const MESSAGES: Record<string, { type: 'ok' | 'err'; text: string }> = {
   etsy_auth:             { type: 'err', text: 'Erro ao autorizar o Etsy. Tente novamente.' },
   etsy_token:            { type: 'err', text: 'Não foi possível obter o token do Etsy. Verifique as credenciais do app.' },
   etsy_not_configured:   { type: 'err', text: 'A integração com Etsy ainda não foi ativada. Configure ETSY_CLIENT_ID e ETSY_REDIRECT_URI no painel de administração.' },
+  plan_required:         { type: 'err', text: 'Conexões de marketplace requerem o plano Pro.' },
 }
 
 export default async function ConexoesPage({

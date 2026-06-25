@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { requireActiveUser } from '@/lib/supabase/require-active'
 
 function base64url(buf: Buffer) {
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
@@ -9,6 +10,13 @@ function base64url(buf: Buffer) {
 
 export async function GET(request: Request) {
   const { origin } = new URL(request.url)
+
+  const result = await requireActiveUser()
+  if (!result.ok) return result.response
+  if (result.profile.plan !== 'pro') {
+    return NextResponse.redirect(`${origin}/dashboard/conexoes?error=plan_required`)
+  }
+
   const clientId   = process.env.ETSY_CLIENT_ID
   const redirectUri = process.env.ETSY_REDIRECT_URI
 
@@ -31,8 +39,7 @@ export async function GET(request: Request) {
   authUrl.searchParams.set('code_challenge_method', 'S256')
 
   const response = NextResponse.redirect(authUrl.toString())
-  // Armazena PKCE em cookies httpOnly para validar no callback
-  response.cookies.set('etsy_cv', codeVerifier, { httpOnly: true, secure: true, maxAge: 600, path: '/' })
-  response.cookies.set('etsy_st', state,        { httpOnly: true, secure: true, maxAge: 600, path: '/' })
+  response.cookies.set('etsy_cv', codeVerifier, { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 600, path: '/' })
+  response.cookies.set('etsy_st', state,        { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 600, path: '/' })
   return response
 }

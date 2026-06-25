@@ -2,33 +2,36 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireActiveUser } from '@/lib/supabase/require-active'
 
 export async function POST(req: Request) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
+  const result = await requireActiveUser()
+  if (!result.ok) return result.response
 
+  const { user } = result
   const { priceId } = await req.json()
   if (!priceId) return NextResponse.json({ error: 'priceId obrigatório' }, { status: 400 })
 
   const admin = createAdminClient()
-  const { data: profile } = await admin.from('profiles').select('stripe_customer_id').eq('id', user.id).single()
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('stripe_customer_id')
+    .eq('id', user.id)
+    .single()
 
   let customerId = profile?.stripe_customer_id as string | undefined
 
   if (!customerId) {
     const customer = await stripe.customers.create({
-      email: user.email!,
-      name:  user.user_metadata?.full_name ?? undefined,
+      email:    user.email!,
       metadata: { supabase_id: user.id },
     })
     customerId = customer.id
     await admin.from('profiles').update({ stripe_customer_id: customer.id }).eq('id', user.id)
   }
 
-  const origin = req.headers.get('origin') ?? 'https://cruzei.primetitec.com.br'
+  const origin = 'https://cruzei.primetitec.com.br'
 
   const session = await stripe.checkout.sessions.create({
     customer:             customerId,
