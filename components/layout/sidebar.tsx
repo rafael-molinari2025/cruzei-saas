@@ -15,6 +15,7 @@ const nav = [
   { href: '/dashboard/nova',       label: 'Nova conciliação', icon: '➕', exact: false },
   { href: '/dashboard/historico',  label: 'Histórico',        icon: '📁', exact: false },
   { href: '/dashboard/conexoes',   label: 'Conexões',         icon: '🔗', exact: false },
+  { href: '/dashboard/perfil',     label: 'Meu perfil',       icon: '👤', exact: false },
 ]
 
 const PLAN_BADGE: Record<string, { label: string; cls: string }> = {

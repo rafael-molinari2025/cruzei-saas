@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { fmtBRL, fmtPct } from '@/lib/utils'
 import type { DBReconciliation } from '@/lib/engine/types'
 import MonthlyChart from '@/components/dashboard/monthly-chart'
+import WelcomeBanner from '@/components/dashboard/welcome-banner'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Visão geral' }
@@ -10,6 +12,10 @@ export const metadata: Metadata = { title: 'Visão geral' }
 export default async function DashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  const admin = createAdminClient()
+  const { data: profile } = await admin.from('profiles').select('plan').eq('id', user!.id).single()
+  const plan = (profile?.plan as string) ?? 'none'
 
   const { data: allRecs } = await supabase
     .from('reconciliations')
@@ -48,6 +54,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
+      <WelcomeBanner plan={plan} />
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Visão geral</h1>
