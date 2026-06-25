@@ -110,6 +110,20 @@ Prioridade de taxa: `feeCSV > 0` (coluna `taxa_marketplace` no CSV) sobrepõe os
 
 O cliente admin (`createAdminClient`) só pode ser usado em API routes — nunca em Client Components nem Server Components acessíveis pelo usuário.
 
+### Segurança de API — `lib/supabase/require-active.ts`
+
+Helper obrigatório em todas as rotas de API que mutam estado:
+
+```ts
+const result = await requireActiveUser()
+if (!result.ok) return result.response   // 401 ou 403
+const { user, profile } = result
+```
+
+Verifica: sessão autenticada + `profile.status === 'active'`. Retorna `{ user, profile: { status, plan } }` em sucesso. As rotas de marketplace auth adicionalmente verificam `profile.plan === 'pro'` antes de iniciar o OAuth.
+
+Não usar `supabase.auth.getUser()` diretamente em API routes sem passar pelo `requireActiveUser` — usuários suspensos conseguem contornar a suspensão via novas assinaturas Stripe se o gate não estiver presente.
+
 ### Stripe (`lib/stripe/`)
 
 `lib/stripe/index.ts` exporta `stripe` como Proxy com lazy init — o cliente Stripe só é instanciado na primeira requisição, não no build. Todas as rotas de API do Stripe têm `export const dynamic = 'force-dynamic'` para impedir pré-renderização estática.
@@ -143,6 +157,16 @@ Protege `/dashboard/*` e `/admin/*` (redireciona não autenticados para `/auth/e
 ### Sidebar
 
 `components/layout/sidebar.tsx` é Client Component e recebe `role`, `plan` e `userEmail` como props vindas do Server Component `app/dashboard/layout.tsx` (que lê o profile via `createAdminClient`). O link **Admin** só aparece quando `role === 'admin'`. O badge de plano abre o portal Stripe se já houver assinatura, ou redireciona para `/planos` se não houver.
+
+### OAuth — marketplace connections
+
+Tanto ML quanto Etsy usam parâmetro `state` CSRF armazenado em cookie `httpOnly`, validado no callback antes de trocar o code. Etsy usa adicionalmente PKCE (code challenge S256).
+
+Fluxo: rota `auth` → gera state/verifier → seta cookies → redireciona ao provider → provider chama `callback` → valida state (+ verifier no Etsy) → troca code → upsert em `marketplace_connections`.
+
+### Headers de segurança HTTP
+
+Configurados em `next.config.js` via `headers()` — aplicados a todas as rotas: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`, `Content-Security-Policy` (permite self + Supabase + Stripe).
 
 ## Deploy
 
